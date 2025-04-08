@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die gelben</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 20px auto;
+        }
+        #cheatInput {
+            display: block;
+            margin: 20px auto;
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snake-Spiel</h1>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <!-- Eingabefeld für den Cheat-Code -->
+    <input type="text" id="cheatInput" placeholder="Cheat-Code eingeben">
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let snake = [{ x: 200, y: 200 }];
+        let direction = { x: 0, y: 0 };
+        let food = { x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20 };
+        let score = 0;
+
+        function drawSnake() {
+            ctx.fillStyle = "green";
+            snake.forEach(part => ctx.fillRect(part.x, part.y, 20, 20));
+        }
+
+        function drawFood() {
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x, food.y, 20, 20);
+        }
+
+        function moveSnake() {
+            const head = { x: snake[0].x + direction.x * 20, y: snake[0].y + direction.y * 20 };
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                food = { x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20 };
+            } else {
+                snake.pop();
+            }
+        }
+
+        function checkCollision() {
+            const head = snake[0];
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height ||
+                snake.slice(1).some(part => part.x === head.x && part.y === head.y)) {
+                alert("Game Over! Score: " + score);
+                snake = [{ x: 200, y: 200 }];
+                direction = { x: 0, y: 0 };
+                score = 0;
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSnake();
+            drawFood();
+            moveSnake();
+            checkCollision();
+        }
+
+        // Steuerung mit Tastatur
+        document.addEventListener("keydown", event => {
+            if (event.key === "ArrowUp" && direction.y === 0) direction = { x: 0, y: -1 };
+            if (event.key === "ArrowDown" && direction.y === 0) direction = { x: 0, y: 1 };
+            if (event.key === "ArrowLeft" && direction.x === 0) direction = { x: -1, y: 0 };
+            if (event.key === "ArrowRight" && direction.x === 0) direction = { x: 1, y: 0 };
+        });
+
+        // Steuerung mit Touch
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        canvas.addEventListener("touchstart", event => {
+            const touch = event.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        });
+
+        canvas.addEventListener("touchmove", event => {
+            const touch = event.touches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontaler Swipe
+                if (deltaX > 0 && direction.x === 0) direction = { x: 1, y: 0 }; // Rechts
+                if (deltaX < 0 && direction.x === 0) direction = { x: -1, y: 0 }; // Links
+            } else {
+                // Vertikaler Swipe
+                if (deltaY > 0 && direction.y === 0) direction = { x: 0, y: 1 }; // Runter
+                if (deltaY < 0 && direction.y === 0) direction = { x: 0, y: -1 }; // Hoch
+            }
+
+            // Touch-Start-Position aktualisieren
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        });
+
+        // Cheat-Code Logik
+        const cheatInput = document.getElementById("cheatInput");
+        cheatInput.addEventListener("input", () => {
+            if (cheatInput.value === "1234") {
+                score = 10000000000000000000000000000000000000000000000000000000000000000; // Cheat: Setze die Punktzahl auf 100
+                alert("Cheat aktiviert! Deine Punktzahl wurde auf 100 gesetzt.");
+                cheatInput.value = ""; // Eingabefeld leeren
+            }
+        });
+
+        setInterval(gameLoop, 100);
+    </script>
+</body>
+</html>
