@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trump Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #game-container {
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #stats {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #products {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        #chart-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+        }
+        #events {
+            margin-top: 20px;
+            font-size: 16px;
+            color: red;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Trump Simulator</h1>
+    <div id="game-container">
+        <p>Setze die Zölle immer höher, um die Wirtschaft zu zerstören!</p>
+        <button id="increase-tariff">Zölle erhöhen</button>
+        <div id="stats">
+            <p>Zölle: <span id="tariff">0%</span></p>
+        </div>
+        <div id="chart-container">
+            <canvas id="dowJonesChart"></canvas>
+        </div>
+        <div id="products">
+            <h3>Produkte:</h3>
+            <ul id="product-list"></ul>
+        </div>
+        <div id="events">
+            <h3>Politische Ereignisse:</h3>
+            <p id="event-message">Keine Ereignisse bisher.</p>
+        </div>
+    </div>
+
+    <script>
+        let tariff = 0; // Zölle in Prozent
+        const products = []; // Liste der Produkte
+        const productNames = ["Autos", "Handys", "Computer", "Kleidung", "Lebensmittel", "Spielzeug", "Möbel", "Werkzeuge", "Bücher", "Elektronik"]; // Produktnamen
+        const dowJonesData = [35000]; // Startwert für den Dow Jones Index
+        const politicalEvents = [
+            { message: "Handelskrieg eskaliert!", impact: -2000 },
+            { message: "Neue Handelsabkommen unterzeichnet!", impact: 1500 },
+            { message: "Präsident kündigt Strafzölle an!", impact: -1000 },
+            { message: "Wirtschaftliche Unsicherheit steigt!", impact: -500 },
+            { message: "Steuererleichterungen für Unternehmen!", impact: 1000 }
+        ];
+
+        const tariffDisplay = document.getElementById("tariff");
+        const increaseTariffButton = document.getElementById("increase-tariff");
+        const productList = document.getElementById("product-list");
+        const eventMessage = document.getElementById("event-message");
+
+        // Initialisiere den Chart
+        const ctx = document.getElementById("dowJonesChart").getContext("2d");
+        const dowJonesChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["Start"], // Zeitpunkte
+                datasets: [{
+                    label: "Dow Jones Index",
+                    data: dowJonesData,
+                    borderColor: "red",
+                    backgroundColor: "rgba(255, 0, 0, 0.2)",
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Zeit"
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: "Indexwert"
+                        },
+                        min: 0
+                    }
+                }
+            }
+        });
+
+        increaseTariffButton.addEventListener("click", () => {
+            tariff += 10; // Zölle um 10% erhöhen
+
+            // Füge ein neues Produkt hinzu
+            const productName = productNames[products.length % productNames.length]; // Zyklisch durch die Produktnamen gehen
+            const basePrice = Math.floor(Math.random() * 100) + 50; // Basispreis zwischen 50 und 150
+            const product = { name: productName, basePrice, currentPrice: basePrice };
+            products.push(product);
+
+            // Aktualisiere die Preise der Produkte
+            products.forEach(p => {
+                p.currentPrice = Math.round(p.basePrice * (1 + tariff / 100));
+            });
+
+            // Aktualisiere den Dow Jones Index
+            const lastValue = dowJonesData[dowJonesData.length - 1];
+            const newValue = lastValue - Math.floor(Math.random() * 1000) - 500; // Zufälliger Rückgang
+            dowJonesData.push(newValue > 0 ? newValue : 0); // Verhindere negative Werte
+            dowJonesChart.data.labels.push(`Zölle ${tariff}%`);
+
+            // Politisches Ereignis auslösen
+            triggerPoliticalEvent();
+
+            dowJonesChart.update();
+
+            // Aktualisiere die Anzeige
+            updateDisplay();
+
+            // Überprüfe, ob der Dow Jones auf 0 gefallen ist
+            if (dowJonesData[dowJonesData.length - 1] <= 0) {
+                alert("Der Dow Jones ist abgestürzt! Du hast gewonnen!");
+                resetGame();
+            }
+        });
+
+        function triggerPoliticalEvent() {
+            const event = politicalEvents[Math.floor(Math.random() * politicalEvents.length)];
+            eventMessage.textContent = event.message;
+
+            // Beeinflusse den Dow Jones Index
+            const lastValue = dowJonesData[dowJonesData.length - 1];
+            const newValue = lastValue + event.impact;
+            dowJonesData.push(newValue > 0 ? newValue : 0); // Verhindere negative Werte
+            dowJonesChart.data.labels.push("Ereignis");
+        }
+
+        function updateDisplay() {
+            tariffDisplay.textContent = `${tariff}%`;
+
+            // Produkte anzeigen
+            productList.innerHTML = "";
+            products.forEach(p => {
+                const li = document.createElement("li");
+                li.textContent = `${p.name}: ${p.currentPrice}€ (Basispreis: ${p.basePrice}€)`;
+                productList.appendChild(li);
+            });
+        }
+
+        function resetGame() {
+            tariff = 0;
+            products.length = 0; // Produkte zurücksetzen
+            dowJonesData.length = 1; // Dow Jones zurücksetzen
+            dowJonesData[0] = 35000; // Startwert
+            dowJonesChart.data.labels = ["Start"];
+            dowJonesChart.update();
+            eventMessage.textContent = "Keine Ereignisse bisher.";
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
