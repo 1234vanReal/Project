@@ -45,15 +45,39 @@
                 return;
             }
 
+            // Punkte für jede Auswahl
+            const points = {
+                "Umweltschutz": { links: 2, mitte: 1, rechts: 0 },
+                "Soziale Gerechtigkeit": { links: 2, mitte: 1, rechts: 0 },
+                "Wirtschaftswachstum": { links: 0, mitte: 2, rechts: 1 },
+                "Bildung": { links: 2, mitte: 2, rechts: 0 },
+                "Sicherheit": { links: 1, mitte: 1, rechts: 2 },
+                "Gesundheit": { links: 1, mitte: 2, rechts: 1 },
+                "Technologie": { links: 1, mitte: 2, rechts: 1 },
+                "Kulturförderung": { links: 1, mitte: 2, rechts: 1 },
+                "Freiheit": { links: 1, mitte: 1, rechts: 1 },
+                "Steuersenkungen": { links: 0, mitte: 1, rechts: 2 }
+            };
+
+            // Punkte berechnen
+            let totalPoints = { links: 0, mitte: 0, rechts: 0 };
+            selectedValues.forEach(value => {
+                totalPoints.links += points[value].links;
+                totalPoints.mitte += points[value].mitte;
+                totalPoints.rechts += points[value].rechts;
+            });
+
+            // Ausrichtung bestimmen
             let alignment = '';
-            if (selectedValues.includes('Umweltschutz') || selectedValues.includes('Soziale Gerechtigkeit')) {
+            if (totalPoints.links > totalPoints.mitte && totalPoints.links > totalPoints.rechts) {
                 alignment = 'links';
-            } else if (selectedValues.includes('Wirtschaftswachstum') || selectedValues.includes('Sicherheit')) {
+            } else if (totalPoints.rechts > totalPoints.links && totalPoints.rechts > totalPoints.mitte) {
                 alignment = 'rechts';
             } else {
                 alignment = 'mitte';
             }
 
+            // Ergebnis anzeigen
             document.getElementById('partyForm').style.display = 'none';
             document.getElementById('result').style.display = 'block';
             document.getElementById('resultText').innerText = `Hallo ${playerName}, deine Partei "${partyName}" ist ${alignment} ausgerichtet.`;
