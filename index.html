@@ -40,8 +40,8 @@
             const partyName = document.getElementById('partyName').value;
             const selectedValues = Array.from(document.querySelectorAll('input[name="values"]:checked')).map(cb => cb.value);
 
-            if (selectedValues.length !== 3) {
-                alert('Bitte wähle genau 3 Dinge aus.');
+            if (selectedValues.length === 0) {
+                alert('Bitte wähle mindestens eine Sache aus.');
                 return;
             }
 
