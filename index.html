@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partei Simulator</title>
+</head>
+<body>
+    <h1>Partei Simulator</h1>
+    <form id="partyForm">
+        <label for="playerName">Dein Name:</label>
+        <input type="text" id="playerName" name="playerName" required><br><br>
+
+        <label for="partyName">Name deiner Partei:</label>
+        <input type="text" id="partyName" name="partyName" required><br><br>
+
+        <p>Wähle 3 Dinge, für die deine Partei stehen soll:</p>
+        <label><input type="checkbox" name="values" value="Umweltschutz"> Umweltschutz</label><br>
+        <label><input type="checkbox" name="values" value="Soziale Gerechtigkeit"> Soziale Gerechtigkeit</label><br>
+        <label><input type="checkbox" name="values" value="Wirtschaftswachstum"> Wirtschaftswachstum</label><br>
+        <label><input type="checkbox" name="values" value="Bildung"> Bildung</label><br>
+        <label><input type="checkbox" name="values" value="Sicherheit"> Sicherheit</label><br>
+        <label><input type="checkbox" name="values" value="Gesundheit"> Gesundheit</label><br>
+        <label><input type="checkbox" name="values" value="Technologie"> Technologie</label><br>
+        <label><input type="checkbox" name="values" value="Kulturförderung"> Kulturförderung</label><br>
+        <label><input type="checkbox" name="values" value="Freiheit"> Freiheit</label><br>
+        <label><input type="checkbox" name="values" value="Steuersenkungen"> Steuersenkungen</label><br><br>
+
+        <button type="button" onclick="submitForm()">Bestätigen</button>
+    </form>
+
+    <div id="result" style="display:none;">
+        <h2>Ergebnis</h2>
+        <p id="resultText"></p>
+    </div>
+
+    <script>
+        function submitForm() {
+            const playerName = document.getElementById('playerName').value;
+            const partyName = document.getElementById('partyName').value;
+            const selectedValues = Array.from(document.querySelectorAll('input[name="values"]:checked')).map(cb => cb.value);
+
+            if (selectedValues.length !== 3) {
+                alert('Bitte wähle genau 3 Dinge aus.');
+                return;
+            }
+
+            let alignment = '';
+            if (selectedValues.includes('Umweltschutz') || selectedValues.includes('Soziale Gerechtigkeit')) {
+                alignment = 'links';
+            } else if (selectedValues.includes('Wirtschaftswachstum') || selectedValues.includes('Sicherheit')) {
+                alignment = 'rechts';
+            } else {
+                alignment = 'mitte';
+            }
+
+            document.getElementById('partyForm').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('resultText').innerText = `Hallo ${playerName}, deine Partei "${partyName}" ist ${alignment} ausgerichtet.`;
+        }
+    </script>
+</body>
+</html>
